@@ -6,7 +6,7 @@ const listData = {
         { name: "Apple", position: 1 },
         { name: "Banana", position: 2 },
         { name: "Orange", position: 3 },
-        { name: "Pineapple", position: 4 },
+        { name: "Pineapple", position: 4 },        
         // Add more items as needed
     ]
 };
@@ -23,48 +23,11 @@ const itemsContainer = document.getElementById("items-container");
 listData.items.forEach(itemData => {
     const item = document.createElement("div");
     item.classList.add("item");
+    item.setAttribute("draggable", "true");
     item.innerText = itemData.name;
     item.dataset.position = itemData.position; // Store position in the dataset
     itemsContainer.appendChild(item);
-
-    // Add touch event listeners
-    item.addEventListener("touchstart", touchStart, false);
-    item.addEventListener("touchmove", touchMove, false);
-    item.addEventListener("touchend", touchEnd, false);
 });
-
-let touchItem = null;
-
-function touchStart(e) {
-    touchItem = e.target;
-    e.preventDefault();
-}
-
-function touchMove(e) {
-    if (!touchItem) return;
-    e.preventDefault();
-
-    const touch = e.touches[0];
-    touchItem.style.left = touch.clientX + "px";
-    touchItem.style.top = touch.clientY + "px";
-}
-
-function touchEnd(e) {
-    if (!touchItem) return;
-    e.preventDefault();
-
-    const dropzone = document.elementFromPoint(touchItem.getBoundingClientRect().x, touchItem.getBoundingClientRect().y);
-    if (dropzone && dropzone.classList.contains("item")) {
-        // Swap positions
-        const temp = touchItem.dataset.position;
-        touchItem.dataset.position = dropzone.dataset.position;
-        dropzone.dataset.position = temp;
-    }
-
-    touchItem.style.left = "";
-    touchItem.style.top = "";
-    touchItem = null;
-}
 
 // Function to check the order when the user clicks the "Check Order" button
 function checkOrder() {
@@ -82,6 +45,47 @@ function checkOrder() {
     } else {
         messageElement.innerText = "Oops! The order is incorrect. Please try again.";
     }
+}
+
+// Add drag and drop functionality
+const draggables = document.querySelectorAll('.item');
+const containers = document.querySelectorAll('.items-container');
+
+draggables.forEach(draggable => {
+    draggable.addEventListener('dragstart', () => {
+        draggable.classList.add('dragging');
+    });
+
+    draggable.addEventListener('dragend', () => {
+        draggable.classList.remove('dragging');
+    });
+});
+
+containers.forEach(container => {
+    container.addEventListener('dragover', e => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(container, e.clientY);
+        const draggable = document.querySelector('.dragging');
+        if (afterElement == null) {
+            container.appendChild(draggable);
+        } else {
+            container.insertBefore(draggable, afterElement);
+        }
+    });
+});
+
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.item:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
 // Function to shuffle an array randomly
