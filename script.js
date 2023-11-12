@@ -6,6 +6,7 @@ const listData = {
         { name: "Apple", position: 1 },
         { name: "Banana", position: 2 },
         { name: "Orange", position: 3 },
+        { name: "Pineapple", position: 4 },        
         // Add more items as needed
     ]
 };
