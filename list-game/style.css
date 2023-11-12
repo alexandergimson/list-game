@@ -1,0 +1,48 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5; /* Background color similar to Cuphead */
+}
+
+#game-container {
+    max-width: 600px;
+    margin: 50px auto;
+    background-color: #fff; /* White background for the game container */
+    border: 5px solid #000; /* Black border similar to Cuphead */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Box shadow for a lifted effect */
+}
+
+.item {
+    background-color: #f9f9f9;
+    border: 2px solid #000;
+    padding: 10px;
+    margin: 5px;
+    cursor: grab;
+    border-radius: 5px;
+    position: relative; /* Make the position relative for pseudo-element positioning */
+}
+
+.item:before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border: 3px dashed #000;
+    border-radius: 5px;
+    pointer-events: none;
+    z-index: -1; /* Move the pseudo-element below the actual content */
+}
+
+#message {
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Add some hover effect for a more interactive feel */
+.item:hover {
+    background-color: #ffeeaa; /* Light yellow background on hover */
+}
