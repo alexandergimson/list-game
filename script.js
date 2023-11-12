@@ -29,6 +29,8 @@ listData.items.forEach(itemData => {
     itemsContainer.appendChild(item);
 });
 
+let touchItem = null;
+
 // Function to check the order when the user clicks the "Check Order" button
 function checkOrder() {
     const items = Array.from(document.querySelectorAll('.item'));
@@ -52,12 +54,22 @@ const draggables = document.querySelectorAll('.item');
 const containers = document.querySelectorAll('.items-container');
 
 draggables.forEach(draggable => {
-    draggable.addEventListener('dragstart', () => {
+    draggable.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', draggable.dataset.position);
         draggable.classList.add('dragging');
     });
 
     draggable.addEventListener('dragend', () => {
         draggable.classList.remove('dragging');
+    });
+
+    // For touch devices
+    draggable.addEventListener('touchstart', (e) => {
+        touchItem = draggable;
+    });
+
+    draggable.addEventListener('touchend', () => {
+        touchItem = null;
     });
 });
 
@@ -65,7 +77,22 @@ containers.forEach(container => {
     container.addEventListener('dragover', e => {
         e.preventDefault();
         const afterElement = getDragAfterElement(container, e.clientY);
-        const draggable = document.querySelector('.dragging');
+        const draggable = document.querySelector('.dragging') || touchItem;
+
+        if (afterElement == null) {
+            container.appendChild(draggable);
+        } else {
+            container.insertBefore(draggable, afterElement);
+        }
+    });
+
+    // For touch devices
+    container.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const afterElement = getDragAfterElement(container, touch.clientY);
+        const draggable = touchItem;
+
         if (afterElement == null) {
             container.appendChild(draggable);
         } else {
