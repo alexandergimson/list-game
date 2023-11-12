@@ -6,7 +6,7 @@ const listData = {
         { name: "Apple", position: 1 },
         { name: "Banana", position: 2 },
         { name: "Orange", position: 3 },
-        { name: "Pineapple", position: 4 },        
+        { name: "Pineapple", position: 4 },
         // Add more items as needed
     ]
 };
@@ -20,7 +20,7 @@ document.getElementById("list-description").innerText = listData.description;
 
 // Create and append items to the items container
 const itemsContainer = document.getElementById("items-container");
-listData.items.forEach(itemData => {
+listData.items.forEach((itemData) => {
     const item = document.createElement("div");
     item.classList.add("item");
     item.setAttribute("draggable", "true");
@@ -31,7 +31,7 @@ listData.items.forEach(itemData => {
 
 // Function to check the order when the user clicks the "Check Order" button
 function checkOrder() {
-    const items = Array.from(document.querySelectorAll('.item'));
+    const items = Array.from(document.querySelectorAll(".item"));
 
     const isCorrectOrder = items.every((item, index) => {
         const position = parseInt(item.dataset.position);
@@ -43,29 +43,77 @@ function checkOrder() {
     if (isCorrectOrder) {
         messageElement.innerText = "Congratulations! The order is correct.";
     } else {
-        messageElement.innerText = "Oops! The order is incorrect. Please try again.";
+        messageElement.innerText =
+            "Oops! The order is incorrect. Please try again.";
     }
 }
 
 // Add drag and drop functionality
-const draggables = document.querySelectorAll('.item');
-const containers = document.querySelectorAll('.items-container');
+const draggables = document.querySelectorAll(".item");
+const containers = document.querySelectorAll(".items-container");
 
-draggables.forEach(draggable => {
-    draggable.addEventListener('dragstart', () => {
-        draggable.classList.add('dragging');
+draggables.forEach((draggable) => {
+    draggable.addEventListener("dragstart", () => {
+        draggable.classList.add("dragging");
     });
 
-    draggable.addEventListener('dragend', () => {
-        draggable.classList.remove('dragging');
+    draggable.addEventListener("dragend", () => {
+        draggable.classList.remove("dragging");
+    });
+
+    // Add touch events for mobile devices
+    draggable.addEventListener("touchstart", (e) => {
+        const touch = e.touches[0];
+        const offsetX = touch.clientX - draggable.getBoundingClientRect().left;
+        const offsetY = touch.clientY - draggable.getBoundingClientRect().top;
+
+        // Store initial touch position
+        draggable.dataset.touchOffsetX = offsetX;
+        draggable.dataset.touchOffsetY = offsetY;
+
+        // Prevent the default touch behavior to avoid conflicts
+        e.preventDefault();
+        e.stopPropagation();
+    });
+
+    draggable.addEventListener("touchmove", (e) => {
+        const touch = e.touches[0];
+        const offsetX = touch.clientX - draggable.dataset.touchOffsetX;
+        const offsetY = touch.clientY - draggable.dataset.touchOffsetY;
+
+        // Move the dragged item
+        draggable.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+
+        // Prevent the default touch behavior to avoid conflicts
+        e.preventDefault();
+        e.stopPropagation();
+    });
+
+    draggable.addEventListener("touchend", (e) => {
+        draggable.classList.remove("dragging");
+
+        // Reset touch offset
+        draggable.dataset.touchOffsetX = 0;
+        draggable.dataset.touchOffsetY = 0;
+
+        // Reset the transform property
+        draggable.style.transform = "";
+
+        // Trigger a dragend event to ensure correct behavior
+        const dragEndEvent = new Event("dragend");
+        draggable.dispatchEvent(dragEndEvent);
+
+        // Prevent the default touch behavior to avoid conflicts
+        e.preventDefault();
+        e.stopPropagation();
     });
 });
 
-containers.forEach(container => {
-    container.addEventListener('dragover', e => {
+containers.forEach((container) => {
+    container.addEventListener("dragover", (e) => {
         e.preventDefault();
         const afterElement = getDragAfterElement(container, e.clientY);
-        const draggable = document.querySelector('.dragging');
+        const draggable = document.querySelector(".dragging");
         if (afterElement == null) {
             container.appendChild(draggable);
         } else {
@@ -75,17 +123,22 @@ containers.forEach(container => {
 });
 
 function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll('.item:not(.dragging)')];
+    const draggableElements = [
+        ...container.querySelectorAll(".item:not(.dragging)"),
+    ];
 
-    return draggableElements.reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset > closest.offset) {
-            return { offset: offset, element: child };
-        } else {
-            return closest;
-        }
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
+    return draggableElements.reduce(
+        (closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        },
+        { offset: Number.NEGATIVE_INFINITY }
+    ).element;
 }
 
 // Function to shuffle an array randomly
