@@ -1,12 +1,14 @@
 // Sample data (replace this with data from your backend)
 const listData = {
-    title: "Fruits",
-    description: "Arrange the fruits in alphabetical order",
+    title: "Elvis songs",
+    description: "Arrange the songs in year released (starting with the oldest)",
     items: [
-        { name: "Apple", position: 1 },
-        { name: "Banana", position: 2 },
-        { name: "Orange", position: 3 },
-        { name: "Pineapple", position: 4 },
+        { name: "Heartbreak Hotel", position: 1 },
+        { name: "Paralyzed", position: 2 },
+        { name: "Are You Lonesome Tonight?", position: 3 },
+        { name: "Crying in the Chapel", position: 4 },
+        { name: "Burning Love", position: 5 },
+
         // Add more items as needed
     ]
 };
@@ -53,23 +55,23 @@ const draggables = document.querySelectorAll(".item");
 const containers = document.querySelectorAll(".items-container");
 
 draggables.forEach((draggable) => {
+    let isDragging = false;
+    let touchStartX, touchStartY;
+
     draggable.addEventListener("dragstart", () => {
+        isDragging = true;
         draggable.classList.add("dragging");
     });
 
     draggable.addEventListener("dragend", () => {
+        isDragging = false;
         draggable.classList.remove("dragging");
     });
 
-    // Add touch events for mobile devices
     draggable.addEventListener("touchstart", (e) => {
         const touch = e.touches[0];
-        const offsetX = touch.clientX - draggable.getBoundingClientRect().left;
-        const offsetY = touch.clientY - draggable.getBoundingClientRect().top;
-
-        // Store initial touch position
-        draggable.dataset.touchOffsetX = offsetX;
-        draggable.dataset.touchOffsetY = offsetY;
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
 
         // Prevent the default touch behavior to avoid conflicts
         e.preventDefault();
@@ -77,9 +79,13 @@ draggables.forEach((draggable) => {
     });
 
     draggable.addEventListener("touchmove", (e) => {
+        if (!isDragging) {
+            return;
+        }
+
         const touch = e.touches[0];
-        const offsetX = touch.clientX - draggable.dataset.touchOffsetX;
-        const offsetY = touch.clientY - draggable.dataset.touchOffsetY;
+        const offsetX = touch.clientX - touchStartX;
+        const offsetY = touch.clientY - touchStartY;
 
         // Move the dragged item
         draggable.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
@@ -90,11 +96,11 @@ draggables.forEach((draggable) => {
     });
 
     draggable.addEventListener("touchend", (e) => {
-        draggable.classList.remove("dragging");
+        if (!isDragging) {
+            return;
+        }
 
-        // Reset touch offset
-        draggable.dataset.touchOffsetX = 0;
-        draggable.dataset.touchOffsetY = 0;
+        isDragging = false;
 
         // Reset the transform property
         draggable.style.transform = "";
